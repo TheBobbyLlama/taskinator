@@ -258,10 +258,62 @@ var saveTasks = function() {
 	localStorage.setItem("tasks", JSON.stringify(tasks));
 }
 
+var loadTasks = function() {
+	tasks = localStorage.getItem("tasks");
+
+	if (tasks === null) {
+		tasks = [];
+		return false;
+	}
+	else
+		tasks = JSON.parse(tasks);
+
+	while (taskIdCounter < tasks.length)
+	{
+		tasks[taskIdCounter].id = taskIdCounter;
+
+		// create list item
+		var listItemEl = document.createElement("li");
+		listItemEl.className = "task-item";
+		listItemEl.setAttribute("data-task-id", taskIdCounter);
+		listItemEl.setAttribute("draggable", "true");
+
+		// create div to hold task info and add to list item
+		var taskInfoEl = document.createElement("div");
+		taskInfoEl.className = "task-info";
+		taskInfoEl.innerHTML = "<h3 class='task-name'>" + tasks[taskIdCounter].name + "</h3><span class='task-type'>" + tasks[taskIdCounter].type + "</span>";
+
+		listItemEl.appendChild(taskInfoEl);
+
+		var taskActionsEl = createTaskActions(taskIdCounter);
+		listItemEl.appendChild(taskActionsEl);
+
+		var statusDropdown = listItemEl.querySelector("select[name='status-change']");
+
+		if (tasks[taskIdCounter].status == "to do") {
+			statusDropdown.selectedIndex = 0;
+			tasksToDoEl.appendChild(listItemEl);
+		}
+		else if (tasks[taskIdCounter].status == "in progress") {
+			statusDropdown.selectedIndex = 1;
+			tasksInProgressEl.appendChild(listItemEl);
+		}
+		else if (tasks[taskIdCounter].status == "complete") {
+			statusDropdown.selectedIndex = 2;
+			tasksCompletedEl.appendChild(listItemEl);
+		}
+
+		taskIdCounter++;
+	}
+
+	return true;
+}
+
 formEl.addEventListener("submit", taskFormHandler);
 pageContentEl.addEventListener("click", taskButtonHandler);
 pageContentEl.addEventListener("change", taskStatusChangeHandler);
 pageContentEl.addEventListener("dragstart", dragTaskHandler);
 pageContentEl.addEventListener("dragover", dropZoneDragHandler);
 pageContentEl.addEventListener("dragleave", dragLeaveHandler);
-pageContentEl.addEventListener("drop", dropTaskHandler)
+pageContentEl.addEventListener("drop", dropTaskHandler);
+loadTasks();
